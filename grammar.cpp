@@ -24,12 +24,6 @@ size_t Grammar::rhs_rule_index(std::string rhs) {
     return rhs_rule_id[rhs];
 }
 
-std::string Grammar::trim(std::string str) {
-    str.erase(0, str.find_first_not_of(" "));
-    str.erase(str.find_last_not_of(" ") + 1);
-    return str;
-}
-
 auto const& Grammar::data() const {
     return rules;
 }

@@ -8,9 +8,9 @@
 #include <set>
 #include <algorithm>
 #include <sstream>
+#include "utility.h"
 
 struct Grammar {
-
 
     Grammar(std::vector<std::string> rules_list,
             std::set<std::string> nonTerminals,
@@ -25,11 +25,9 @@ struct Grammar {
 
 private:
 
-
     std::pair<std::map<std::string, std::set<std::string>>,
               std::set<std::string>> build_first_epsilon_set();
     size_t rhs_rule_index(std::string);
-    std::string trim(std::string str);
     bool unite(std::set<std::string>& st1, std::set<std::string> const& st2);
 
     std::map<std::string, std::size_t> rhs_rule_id;

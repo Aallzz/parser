@@ -18,19 +18,12 @@ struct Tree {
         (root->push_node(std::move(cdren.root)),...);
     }
 
-    Tree(Tree&& other) {
-        root = (std::move(other.root));
-    }
-
+    Tree(Tree&& other);
     Tree(std::string value);
 
     std::vector<std::string> data();
 
 private:
-
-    struct node;
-
-    void dfs(std::unique_ptr<node> const& cur, std::vector<std::string>& res);
 
     struct node {
 
@@ -48,9 +41,9 @@ private:
     };
 
 
+    void dfs(std::unique_ptr<node> const& cur, std::vector<std::string>& res);
+
     std::unique_ptr<node> root {};
-
-
     std::vector<std::string> ws;
 };
 
@@ -66,7 +59,6 @@ private:
 
     std::map<std::string, std::function<Tree(void)>> parse_;
     Lexer lexer;
-
 };
 
 #endif // PARSER_H

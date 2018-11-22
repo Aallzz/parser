@@ -2,15 +2,9 @@
 #include "lexer.h"
 #include "grammar.h"
 #include "parser.h"
+#include "utility.h"
 
 using namespace std;
-
-std::ostream& operator << (ostream& out, Token token) {
-    out << token_names[static_cast<std::underlying_type<Token>::type>(token)];
-    return out;
-}
-
-
 
 int main() {
     Lexer lexer("  ( a  and b)");
@@ -52,6 +46,7 @@ int main() {
         cout << value << endl;
     }
 
+    cout << build_json_tree(vxx);
     return 0;
 }
 

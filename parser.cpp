@@ -1,12 +1,14 @@
 #include "parser.h"
 
+Tree::Tree(Tree&& other) {
+    root = (std::move(other.root));
+}
 
-Tree::Tree(std::string value) : root (std::make_unique<node>(value)) {}
+Tree::Tree(std::string value) : root (std::make_unique<node>(std::move(value))) {}
 
 Tree::node::node(std::string const& vl) : value(vl) {}
 
 void Tree::node::push_node(std::unique_ptr<node>&& pn) {
-//    std::cout << pn->value << std::endl;
     children.emplace_back(std::move(pn));
 }
 
@@ -26,13 +28,15 @@ std::vector<std::string> Tree::data() {
 }
 
 void Tree::dfs(std::unique_ptr<node> const& cur, std::vector<std::string>& res) {
+    static std::string w = "";
     if (!cur) return ;
-    res.push_back(cur->value);
-    res.push_back("\\");
+    res.push_back(w + cur->value);
     for (auto const& to : cur->children) {
+        w += "  ";
         dfs(to, res);
+        w.pop_back();
+        w.pop_back();
     }
-    res.push_back("/");
 }
 
 Parser::Parser(std::string str) : lexer(str) {
