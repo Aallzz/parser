@@ -84,7 +84,6 @@ Parser::Parser(std::string str) : lexer(str) {
 Tree Parser::parse_help(std::string operation, std::string ntroot) {
     lexer.next_token();
     Tree tree_1 = std::invoke(parse_["S"]);
-    lexer.next_token();
     Tree tree_2 = std::invoke(parse_["S'"]);
     return Tree(ntroot, Tree(operation), std::move(tree_1), std::move(tree_2));
 }

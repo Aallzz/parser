@@ -7,16 +7,22 @@
     <title> Basic example </title>
     <link rel="stylesheet" href="treant-js/Treant.css">
     <link rel="stylesheet" href="tree.css">
+    <link rel="stylesheet" href="page_style.css">
 </head>
 <body>
-    <div class="chart" id="my_tree"></div>
-    <script src="treant-js/vendor/raphael.js"></script>
-    <script src="treant-js/Treant.js"></script>
     
-    <script src="tree.js"></script>
-    <script>
-        new Treant( chart_config );
-    </script>
+   <section class="container">
+       <div class="left-half">
+          <div class="chart" id="my_tree"></div>
+          <script src="treant-js/vendor/raphael.js"></script>
+          <script src="treant-js/Treant.js"></script>
+          <script src="tree.js"></script>
+          <script> new Treant( chart_config )</script> 
+       </div>
+     <div class="right-half">
+    </div>
+  </section>
+
 </body>
 </html>
 

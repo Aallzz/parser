@@ -64,8 +64,8 @@ int main() {
     }
     cout << "HEEEEE" << std::endl;
 
-//    Parser p("(a and b) or not (c xor (a or not b))");
-    Parser p("(a and b)");
+    Parser p("(a and b) or not (c xor (a or not b))");
+//    Parser p("((a) and not b)");
     auto tree = p.parse();
 
 

@@ -169,7 +169,6 @@ std::map<std::string, std::set<std::string>> Grammar::transform_index_by_rule(st
     std::map<std::string, std::set<std::string>> res;
     for (std::size_t nt_id : nonTerminals) {
         std::string nt = rule_by_index(nt_id).back();
-        std::cout << "debug nonterm : " << nt << std::endl;
         for (auto const& fst : mp[nt_id]) {
             res[nt].insert(rule_by_index(fst).back());
         }

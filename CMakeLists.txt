@@ -20,5 +20,32 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 # from https://stackoverflow.com/questions/17018477/cmake-adding-custom-resources-to-build-directory
-FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tree.css" "${CMAKE_CURRENT_SOURCE_DIR}/index.html" "${CMAKE_CURRENT_SOURCE_DIR}/treant-js"
-    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+#FILE(COPY
+#    "${CMAKE_CURRENT_SOURCE_DIR}/tree.css"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/page_style.css"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/treant-js"
+#    DESTINATION
+#    "${CMAKE_CURRENT_BINARY_DIR}")
+
+# create a list of files to copy
+set( THIRD_PARTY_DLLS
+    "tree.css"
+    "page_style.css"
+    "index.html"
+    "treant-js"
+)
+
+# do the copying
+foreach(file ${THIRD_PARTY_DLLS})
+    add_custom_target("config-${file}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${file}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${file}" "${CMAKE_CURRENT_BINARY_DIR}/${file}"
+      )
+    add_dependencies(${PROJECT_NAME} "config-${file}")
+endforeach()
+
+
+
+
+
