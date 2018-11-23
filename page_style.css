@@ -45,7 +45,8 @@ h1 {
   height : 20%;
   background-color: #ff9922;
   border-color: black;
-  border-style : solid;
+  border-style: solid;
+  border-width: 1px;
 }
 
 

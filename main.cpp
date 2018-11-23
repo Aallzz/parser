@@ -48,7 +48,11 @@ int main() {
 //                        "E");
 
 
-    Parser p("(a and b) or not (c xor (a or not b))");
+    std::string string_expression = "(a and b) or not (c xor (a or not b))";
+    ofstream parser_out("parser_string.js");
+    parser_out << "function parser_string() { document.getElementById('parser_string_place').innerHTML = '"s + string_expression + "';}\nparser_string();" << std::endl;
+
+    Parser p(string_expression);
     auto tree = p.parse();
 
     ofstream fjsout("tree.js");
