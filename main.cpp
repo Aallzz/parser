@@ -12,13 +12,6 @@
 using namespace std;
 
 int main() {
-    Lexer lexer("  ( a  and b)");
-    Token x;
-    while ((x = lexer.next_token()) != Token::None) {
-        cout << x << " ";
-    }
-
-    cout << endl;
     Grammar grammar({
                      "S  -> ( S ) S'",
                      "S  -> not S S'",
@@ -54,49 +47,36 @@ int main() {
 //                        },
 //                        "E");
 
-    auto res = grammar.build_follow_set();
-    for (auto const& e : res) {
-        cout << e.first << ": ";
-        for (auto const& r : e.second) {
-            cout << r << ", ";
-        }
-        cout << endl;
-    }
-    cout << "HEEEEE" << std::endl;
 
     Parser p("(a and b) or not (c xor (a or not b))");
-//    Parser p("((a) and not b)");
     auto tree = p.parse();
 
-
-
     ofstream fjsout("tree.js");
-    fjsout << build_json_tree(tree.data());
-
+    fjsout << build_json_tree(tree.data()) << std::endl;
+    ofstream follow_out("follow.js");
+    follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
+    ofstream first_out("first.js");
+    first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
     pid_t pid = fork();
 
     if (pid < 0) {
-        std::cout << "Cannot fork process" << std::endl;
+        std::cerr << "Cannot fork process" << std::endl;
         return 0;
     }
-
 
     auto browser_args = get_browser_arguments();
     char* arguments[] = {browser_args.first.data(), browser_args.second.data(), nullptr};
     if (pid == 0) {
         if (execvp(arguments[0], arguments) < 0) {
-            cout << "hmm" << endl;
-            cout << x << endl;
+            return -1;
         }
-        cout << "Fast" << endl;
-        return 111;
+        return 0;
     } else {
         int status;
         while (wait(&status) != pid) {
         }
     }
 
-    cout << "DONE" << endl;
     return 0;
 }
 

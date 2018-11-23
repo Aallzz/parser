@@ -1,4 +1,5 @@
 #include "utility.h"
+#include <iostream>
 
 std::string build_json_tree(std::vector<std::string> const& tree) {
 //    using std::string_literals::operator""s;
@@ -31,6 +32,65 @@ std::string build_json_tree(std::vector<std::string> const& tree) {
         res += indent + "node"s + std::to_string(i) + ",\n";
     }
     res += "        ];\n";
+    return res;
+}
+
+std::string build_json_map(std::map<std::string, std::set<std::string>> const& mp, std::string where) {
+//    using std::string_literals::operator""s;
+    using namespace std; // to avoid annoying ""s warning
+    std::string res;
+    res += "function generate_" + where + "_table() {\n"s;
+    res += "    var div = document.getElementById('" + where + "_place');\n"s;
+    res += "    var tbl = document.createElement('" + where + "_table');\n"s;
+    res += "    var tblBody = document.createElement('tbody');\n"s;
+    res += "    var row = document.createElement('tr');\n"s;
+    res += "    var cell_caption = document.createElement('td');\n"s;
+    res += "    var cell_caption_text = document.createTextNode('"s + where + "_set');\n"s;
+    res += "    cell_caption.appendChild(cell_caption_text);\n"s;
+    res += "    row.appendChild(cell_caption);\n"s;
+    res += "        tblBody.appendChild(row);\n"s;
+    res += "    var nonTerms = [\n";
+    for (auto const& assoc : mp) {
+        res += "            \""s +assoc.first + "\",\n"s;
+    }
+    res += "    ];\n"s;
+    res += "    var term_sets = [\n";
+    for (auto const& assoc : mp) {
+
+        std::string term_set = "'{";
+        bool comma = {false};
+        for_each(assoc.second.begin(), assoc.second.end(), [&comma, &term_set](auto const& term) {
+            if (comma) {
+                term_set += ", ";
+            }
+            comma = true;
+            term_set += term;
+        });
+        term_set += "}'";
+
+        res += "            "s +term_set + ",\n"s;
+    }
+    res += "    ];\n";
+
+    res += "    for (var i = 0; i < "s + to_string(mp.size()) + "; i++){\n"s;
+    res += "        var row = document.createElement('tr');\n"s;
+    res += "        var cell_nonTerm = document.createElement('td');\n"s;
+    res += "        var cell_term_set = document.createElement('td');\n"s;
+    res += "        var cell_nonTerm_text = document.createTextNode(nonTerms[i] + \": \");\n"s;
+    res += "        var cell_term_set_text = document.createTextNode(term_sets[i]);\n"s;
+    res += "        cell_nonTerm.appendChild(cell_nonTerm_text);\n"s;
+    res += "        row.appendChild(cell_nonTerm);\n"s;
+    res += "        cell_term_set.appendChild(cell_term_set_text);\n"s;
+    res += "        row.appendChild(cell_term_set);\n"s;
+    res += "        tblBody.appendChild(row);\n"s;
+    res += "    };\n";
+
+    res += "    tbl.appendChild(tblBody);\n";
+    res += "    div.appendChild(tbl);\n";
+    res += "    tbl.setAttribute('border', '2');\n";
+    res += "};\n";
+    res += "generate_" + where + "_table();\n";
+
     return res;
 }
 

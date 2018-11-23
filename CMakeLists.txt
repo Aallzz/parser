@@ -19,17 +19,8 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++17 -Wall -fsanitize=address")
 endif()
 
-# from https://stackoverflow.com/questions/17018477/cmake-adding-custom-resources-to-build-directory
-#FILE(COPY
-#    "${CMAKE_CURRENT_SOURCE_DIR}/tree.css"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/page_style.css"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/treant-js"
-#    DESTINATION
-#    "${CMAKE_CURRENT_BINARY_DIR}")
-
 # create a list of files to copy
-set( THIRD_PARTY_DLLS
+set( res
     "tree.css"
     "page_style.css"
     "index.html"
@@ -37,7 +28,7 @@ set( THIRD_PARTY_DLLS
 )
 
 # do the copying
-foreach(file ${THIRD_PARTY_DLLS})
+foreach(file ${res})
     add_custom_target("config-${file}"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${file}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${file}" "${CMAKE_CURRENT_BINARY_DIR}/${file}"
