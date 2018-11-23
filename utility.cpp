@@ -10,7 +10,7 @@ std::string build_json_tree(std::vector<std::string> const& tree) {
     res += "var config = {\n"s;
     res += indent + "container: \""s + "#my_tree"s + "\",\n"s;
     res += indent + "connectors: { type: 'step'},\n"s;
-    res += indent + "node: { HTMLclass: 'nodeExample1'},\n"s;
+    res += indent + "node: { HTMLclass: 'tree-style'},\n"s;
     res += "        },\n";
 
     for (auto const& branch : tree) {
@@ -44,3 +44,15 @@ std::string trim(std::string str) {
     str.erase(str.find_last_not_of(" ") + 1);
     return str;
 }
+
+std::pair<std::string, std::string> get_browser_arguments() {
+    char cCurrentPath[FILENAME_MAX];
+    if (!getcwd(cCurrentPath, sizeof(cCurrentPath))) {
+        throw std::exception();
+    }
+    std::string f(cCurrentPath);
+    f += "/index.html";
+    std::string ff("firefox");
+    return {ff, f};
+}
+

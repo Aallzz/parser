@@ -74,10 +74,9 @@ Parser::Parser(std::string str) : lexer(str) {
                 return parse_help("or", "S'");
             case Token::Xor:
                 return parse_help("xor", "S'");
-            case Token::None:
-                return Tree("S'", Tree("eps"));
+            case Token::RB:
             default:
-                throw std::exception();
+                return Tree("S'", Tree("eps"));
         }
     };
 }
