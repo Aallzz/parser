@@ -57,9 +57,10 @@ Parser::Parser(std::string str) : lexer(str) {
                 return parse_help("not", "S");
             }
             case Token::Var: {
+                std::string cur = lexer.current_string_token();
                 lexer.next_token();
                 Tree tree_2 = std::invoke(parse_["S'"]);
-                return Tree("S", Tree("var"), std::move(tree_2));
+                return Tree("S", Tree(cur), std::move(tree_2));
             }
             default:
                 throw std::exception();
@@ -99,12 +100,19 @@ Tree Parser::parse(Grammar& grammar) {
     action.push_back(grammar.get_start());
     Tree tree (grammar.get_start());
     lexer.next_token();
-    while (!action.empty()) {
-        if (grammar.is_nonTerminal(action.back())) {
+    auto ll1_table = grammar.build_ll1_table();
 
+    while (!action.empty()) {
+        std::string cur = action.back();
+        action.pop_back();
+        if (grammar.is_nonTerminal(action.back())) {
+            if (!ll1_table.count(cur)) {
+                throw std::exception();
+            }
+//            if (!ll1_table[cur].count())
         } else if (grammar.is_terminal(action.back())) {
             if (lexer.token_by_string(action.back()) == lexer.current_token()) {
-
+                lexer.next_token();
             } else {
                 throw std::exception();
             }

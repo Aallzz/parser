@@ -29,6 +29,7 @@ struct Lexer {
 
     Token next_token();
     Token current_token() const;
+    std::string const& current_string_token() const;
 
     Token token_by_string(std::string const&);
 private:
@@ -60,6 +61,7 @@ private:
 
     std::istringstream iss;
     Token _current_token;
+    std::string _current_string_token;
 };
 
 #endif // LEXER_H

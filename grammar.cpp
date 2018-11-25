@@ -301,7 +301,6 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
         auto nt = rule_by_index(rule.first)[0];
         for (auto const& rhs_id : rule.second) {
 
-
             std::vector<std::string> rhs = rule_by_index(rhs_id);
             auto fst_suf = get_first(rhs);
             for (auto const& t : fst_suf) {
@@ -320,18 +319,15 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
                 }
                 w_follow.push_back(rule_by_index(flw)[0]);
                 for (auto const& terminal : get_first(w_follow)) {
-//                    if (res[nt].count(terminal)) {
-//                        throw std::exception();
-//                    }
-                    std::cout << nt << std::endl;
-
+                    if (res[nt].count(terminal)) {
+                        if (res[nt][terminal] != rhs) {
+                            throw std::exception();
+                        }
+                    }
                     res[nt][terminal] = rhs;
                 }
                 w_follow.pop_back();
             }
-
-
-
         }
     }
 

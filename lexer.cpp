@@ -1,6 +1,5 @@
 #include "lexer.h"
 
-
 Lexer::Lexer(std::string const& str) : iss(str) {
     tokens_trie.add_string("and", Token::And);
     tokens_trie.add_string("or", Token::Or);
@@ -15,25 +14,33 @@ Lexer::Lexer(std::string const& str) : iss(str) {
 
 Token Lexer::next_token() {
     char c;
+    std::string cur_string_token;
     while (isspace(iss.peek())) {
         iss.get();
     }
     tokens_trie.reset_state();
     while (!iss.eof() && (c = static_cast<char>(iss.get()))) {
+        cur_string_token += c;
         if (tokens_trie.move_state(c)) {
             if (tokens_trie.has_key()
                     && !tokens_trie.has_next(static_cast<char>(iss.peek()))) {
+                _current_string_token = cur_string_token;
                 return _current_token = tokens_trie.get_key();
             }
         } else {
             throw std::exception();
         }
     }
+    _current_string_token = cur_string_token;
     return _current_token = Token::None;
 }
 
 Token Lexer::current_token() const {
     return _current_token;
+}
+
+std::string const& Lexer::current_string_token() const {
+    return _current_string_token;
 }
 
 Lexer::trie::trie() {

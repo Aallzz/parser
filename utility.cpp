@@ -179,7 +179,6 @@ std::string build_json_map(std::map<std::string, std::map<std::string, std::vect
 
     res += "appendColumn();\n"s;
 
-    std::cout << res << std::endl;
     return res;
 }
 
