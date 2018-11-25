@@ -77,3 +77,10 @@ bool Lexer::trie::has_next(char c) const {
 Token Lexer::trie::get_key() const {
     return t[state].key;
 }
+
+Token Lexer::token_by_string(std::string const& s) {
+    for (char c : s) {
+        tokens_trie.move_state(c);
+    }
+    return tokens_trie.get_key();
+}

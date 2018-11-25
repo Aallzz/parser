@@ -10,7 +10,7 @@
 #include <sstream>
 #include "utility.h"
 #include <iostream>
-
+#include <cassert>
 struct Grammar {
 
     Grammar(std::vector<std::string> rules_list,
@@ -22,12 +22,21 @@ struct Grammar {
 
     std::map<std::string, std::set<std::string>> build_follow_set();
     std::map<std::string, std::set<std::string>> build_first_set();
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> build_ll1_table();
+
+    bool is_terminal(std::string const&);
+    bool is_nonTerminal(std::string const&);
+
+    std::string get_start();
 
 private:
 
+    std::set<std::string> get_first(std::vector<std::string> const& s);
+    std::set<std::size_t> get_first_raw(std::vector<std::string> const& s);
     std::map<std::size_t, std::set<std::size_t>>  build_follow_set_raw();
     std::map<std::size_t, std::set<std::size_t>>  build_first_set_raw();
 
+    std::set<std::string> transform_index_by_rule(std::set<std::size_t> st);
     std::map<std::string, std::set<std::string>> transform_index_by_rule(std::map<std::size_t, std::set<std::size_t>>);
     size_t index_by_rule(std::vector<std::string> const&);
     size_t index_by_rule(std::string const& entity);
@@ -43,6 +52,9 @@ private:
     std::set<std::size_t> nonTerminals;
     std::set<std::size_t> terminals;
     std::string start;
+
+    std::map<std::size_t, std::set<std::size_t>> first_set;
+    std::map<std::size_t, std::set<std::size_t>> follow_set;
 
 };
 

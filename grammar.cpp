@@ -18,12 +18,7 @@ Grammar::Grammar(std::vector<std::string> rules_list,
         size_t pos = rule.find("->");
         auto nonTerminal = trim(rule.substr(0, pos));
         auto rhs_string = trim(rule.substr(pos + 2));
-        std::vector<std::string> rhs;
-        std::istringstream iss(rhs_string);
-        std::string current_term;
-        while (std::getline(iss, current_term, ' ')) {
-            rhs.emplace_back(std::move(current_term));
-        }
+        std::vector<std::string> rhs = split(rhs_string, ' ');
         rules[index_by_rule(nonTerminal)].push_back(index_by_rule(rhs));
     }
 }
@@ -176,6 +171,14 @@ std::map<std::string, std::set<std::string>> Grammar::transform_index_by_rule(st
     return res;
 }
 
+std::set<std::string> Grammar::transform_index_by_rule(std::set<std::size_t> st) {
+    std::set<std::string> res;
+    for (auto const& t : st) {
+        res.insert(rule_by_index(t)[0]);
+    }
+    return res;
+}
+
 std::map<std::size_t, std::set<std::size_t>> Grammar::build_follow_set_raw() {
     std::map<std::size_t, std::set<std::size_t>> follow;
     auto first = build_first_set_raw();
@@ -223,15 +226,117 @@ std::map<std::size_t, std::set<std::size_t>> Grammar::build_follow_set_raw() {
 }
 
 std::map<std::string, std::set<std::string>> Grammar::build_follow_set() {
-    return transform_index_by_rule(build_follow_set_raw());
+    if (follow_set.empty()) {
+        follow_set = build_follow_set_raw();
+    }
+    return transform_index_by_rule(follow_set);
 }
 
 std::map<std::string, std::set<std::string>> Grammar::build_first_set() {
-    return transform_index_by_rule(build_first_set_raw());
+    if (first_set.empty()) {
+        first_set = build_first_set_raw();
+    }
+    return transform_index_by_rule(first_set);
 }
 
+bool Grammar::is_nonTerminal(std::string const& str) {
+    return nonTerminals.count(index_by_rule(str));
+}
+
+bool Grammar::is_terminal(std::string const& str) {
+    return terminals.count(index_by_rule(str));
+}
+
+std::string Grammar::get_start() {
+    return start;
+}
+
+std::set<std::string> Grammar::get_first(std::vector<std::string> const& s) {
+    if (first_set.empty()) {
+        first_set = build_follow_set_raw();
+    }
+    if (!first_set.count(index_by_rule(s))) {
+        if (is_terminal(s[0])) {
+            first_set[index_by_rule(s)].insert(index_by_rule(s[0]));
+        } else {
+            if (first_set[index_by_rule(s[0])].count(index_by_rule("eps"))) {
+                bool has = first_set[index_by_rule(s)].count(index_by_rule("eps")) != 0;
+                if (has) first_set[index_by_rule(s)].erase(index_by_rule("eps"));
+                unite(first_set[index_by_rule(s)], first_set[index_by_rule(s[0])]);
+                unite(first_set[index_by_rule(s)], get_first_raw(std::vector<std::string>(std::next(s.begin()), s.end())));
+                if (has) first_set[index_by_rule(s)].insert(index_by_rule("eps"));
+            } else {
+                first_set[index_by_rule(s)] = first_set[index_by_rule(s[0])];
+            }
+        }
+    }
+    return transform_index_by_rule(first_set[index_by_rule(s)]);
+}
+
+std::set<std::size_t> Grammar::get_first_raw(std::vector<std::string> const& s) {
+    if (!first_set.count(index_by_rule(s))) {
+        if (is_terminal(s[0])) {
+            first_set[index_by_rule(s)].insert(index_by_rule(s[0]));
+        } else {
+            if (first_set[index_by_rule(s[0])].count(index_by_rule("eps"))) {
+                bool has = first_set[index_by_rule(s)].count(index_by_rule("eps")) != 0;
+                if (has) first_set[index_by_rule(s)].erase(index_by_rule("eps"));
+                unite(first_set[index_by_rule(s)], first_set[index_by_rule(s[0])]);
+                unite(first_set[index_by_rule(s)], get_first_raw(std::vector<std::string>(std::next(s.begin()), s.end())));
+                if (has) first_set[index_by_rule(s)].insert(index_by_rule("eps"));
+            } else {
+                first_set[index_by_rule(s)] = first_set[index_by_rule(s[0])];
+            }
+        }
+    }
+    return first_set[index_by_rule(s[0])];
+}
+
+std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::build_ll1_table() {
+    std::map<std::string, std::map<std::string, std::vector<std::string>>> res;
+    auto fst = build_first_set_raw();
+    build_follow_set_raw();
+
+    for (auto const& rule : rules) {
+        auto nt = rule_by_index(rule.first)[0];
+        for (auto const& rhs_id : rule.second) {
 
 
+            std::vector<std::string> rhs = rule_by_index(rhs_id);
+            auto fst_suf = get_first(rhs);
+            for (auto const& t : fst_suf) {
+                if (t == "eps") {
+                    for (std::size_t tt_id : follow_set[index_by_rule(nt)]) {
+                        res[nt][rule_by_index(tt_id)[0]] = rhs;
+                    }
+                }
+                res[nt][t] = rhs;
+            }
+
+            std::vector<std::string> w_follow(rhs);
+            for (size_t flw : follow_set[index_by_rule(nt)]) {
+                if (flw == index_by_rule("esp")) {
+                    continue;
+                }
+                w_follow.push_back(rule_by_index(flw)[0]);
+                for (auto const& terminal : get_first(w_follow)) {
+//                    if (res[nt].count(terminal)) {
+//                        throw std::exception();
+//                    }
+                    std::cout << nt << std::endl;
+
+                    res[nt][terminal] = rhs;
+                }
+                w_follow.pop_back();
+            }
+
+
+
+        }
+    }
+
+    return res;
+}
 
 
 

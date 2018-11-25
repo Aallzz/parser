@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include "lexer.h"
+#include "grammar.h"
 #include <iostream>
 #include <iomanip>
 
@@ -49,9 +50,10 @@ private:
 
 struct Parser {
 
-    Tree parse();
-
     Parser(std::string str);
+
+    Tree parse();
+    Tree parse(Grammar& grammar);
 
 private:
 

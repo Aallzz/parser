@@ -30,6 +30,7 @@ struct Lexer {
     Token next_token();
     Token current_token() const;
 
+    Token token_by_string(std::string const&);
 private:
 
     template<typename T>

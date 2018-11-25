@@ -93,6 +93,28 @@ Tree Parser::parse() {
     return std::invoke(parse_["S"]);
 }
 
+Tree Parser::parse(Grammar& grammar) {
+    /// reversed rule for action
+    std::vector<std::string> action;
+    action.push_back(grammar.get_start());
+    Tree tree (grammar.get_start());
+    lexer.next_token();
+    while (!action.empty()) {
+        if (grammar.is_nonTerminal(action.back())) {
+
+        } else if (grammar.is_terminal(action.back())) {
+            if (lexer.token_by_string(action.back()) == lexer.current_token()) {
+
+            } else {
+                throw std::exception();
+            }
+        } else {
+            throw std::exception();
+        }
+    }
+    return tree;
+}
+
 //http://fperucic.github.io/treant-js/
 /* S  -> (S) S'
  * S  -> not S S'

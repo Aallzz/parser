@@ -12,41 +12,62 @@
 using namespace std;
 
 int main() {
-    Grammar grammar({
-                     "S  -> ( S ) S'",
-                     "S  -> not S S'",
-                     "S  -> Var S'",
-                     "S' -> and S S'",
-                     "S' -> or S S'",
-                     "S' -> xor S S'",
-                     "S' -> eps",
-                    },
-                    {
-                     "S", "S'"
-                    },
-                    {
-                     "(", ")", "not", "Var", "and", "or", "xor", "eps"
-                    },
-                    "S");
+//    Grammar grammar({
+//                     "S  -> ( S ) S'",
+//                     "S  -> not S S'",
+//                     "S  -> Var S'",
+//                     "S' -> and S S'",
+//                     "S' -> or S S'",
+//                     "S' -> xor S S'",
+//                     "S' -> eps",
+//                    },
+//                    {
+//                     "S", "S'"
+//                    },
+//                    {
+//                     "(", ")", "not", "Var", "and", "or", "xor", "eps"
+//                    },
+//                    "S");
 
-//        Grammar grammar({
-//                            "E -> T E'",
-//                            "E' -> + T E'",
-//                            "E' -> eps",
-//                            "T -> F T'",
-//                            "T' -> * F T'",
-//                            "T' -> eps",
-//                            "F -> n",
-//                            "F -> ( E )"
-//                        },
-//                        {
+        Grammar grammar({
+                            "E -> T E'",
+                            "E' -> + T E'",
+                            "E' -> eps",
+                            "T -> F T'",
+                            "T' -> * F T'",
+                            "T' -> eps",
+                            "F -> n",
+                            "F -> ( E )"
+                        },
+                        {
+                            "E", "E'", "T", "T'", "F"
+                        },
+                        {
+                            "(", ")", "n", "-", "+", "*", "+", "eps", "$"
+                        },
+                        "E");
+
+//        Grammar grammar ({
+//                             "E -> T X",
+//                             "X -> + T X",
+//                             "X -> - T X",
+//                             "X -> eps",
+//                             "T -> F Y",
+//                             "Y -> * F Y",
+//                             "Y -> eps",
+//                             "F -> - F",
+//                             "F -> + F",
+//                             "F -> n",
+//                             "F -> ( E )"
+//                         },
+//                         {
 //                            "E", "E'", "T", "T'", "F"
-//                        },
-//                        {
-//                            "(", ")", "n", "-", "+", "*", "+", "eps"
-//                        },
-//                        "E");
-
+//                         },
+//                         {
+//                            "+", "-", "*", "n", "(", ")", "eps", "$"
+//                         },
+//                         "E"
+//                         );
 
     std::string string_expression = "(a and b) or not (c xor (a or not b))";
     ofstream parser_out("parser_string.js");
@@ -61,6 +82,10 @@ int main() {
     follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
     ofstream first_out("first.js");
     first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
+    ofstream move_table_out("move_table.js");
+    move_table_out << build_json_map(grammar.build_ll1_table(), "move_table") << std::endl;
+
+
     pid_t pid = fork();
 
     if (pid < 0) {
