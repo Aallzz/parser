@@ -1,15 +1,19 @@
 #include "lexer.h"
 
-Lexer::Lexer(std::string const& str) : iss(str) {
+Lexer::Lexer(std::string const& str) : iss(str + "$") {
     tokens_trie.add_string("and", Token::And);
     tokens_trie.add_string("or", Token::Or);
     tokens_trie.add_string("xor", Token::Xor);
     tokens_trie.add_string("not", Token::Not);
     tokens_trie.add_string("(", Token::LB);
     tokens_trie.add_string(")", Token::RB);
-    for (char i = 'a'; i <= 'z'; ++i) {
-        tokens_trie.add_string(std::string(1, i), Token::Var);
-    }
+    tokens_trie.add_string("$", Token::End);
+    tokens_trie.add_string("a", Token::Var);
+    tokens_trie.add_string("b", Token::Var);
+    tokens_trie.add_string("v", Token::Var);
+//    for (char i = 'a'; i <= 'z'; ++i) {
+//        tokens_trie.add_string(std::string(1, i), Token::Var);
+//    }
 }
 
 Token Lexer::next_token() {
@@ -28,7 +32,8 @@ Token Lexer::next_token() {
                 return _current_token = tokens_trie.get_key();
             }
         } else {
-            throw std::exception();
+            _current_string_token = cur_string_token;
+            return _current_token = Token::None;
         }
     }
     _current_string_token = cur_string_token;

@@ -10,6 +10,18 @@
 #include <iostream>
 #include <iomanip>
 
+
+struct parser_exception : public std::exception {
+public:
+    explicit parser_exception(const char* message);
+    explicit parser_exception(const std::string& message);
+    ~parser_exception() override;
+    const char* what() const noexcept override;
+protected:
+    std::string msg_;
+};
+
+
 struct Tree {
 
     template<typename... Trees,

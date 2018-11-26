@@ -19,6 +19,7 @@ enum class Token {
     RB,
     Var,
     Eps,
+    End,
 };
 
 static constexpr std::string_view token_names[] {"END", "And", "Or", "Not", "Xor", "LB", "RB", "Var"};

@@ -1,5 +1,15 @@
 #include "parser.h"
 
+parser_exception::parser_exception(const char* message) : msg_(message) {}
+
+parser_exception::parser_exception(const std::string& message) : msg_(message) {}
+
+parser_exception::~parser_exception() {}
+
+const char* parser_exception::what() const noexcept{
+   return msg_.c_str();
+}
+
 Tree::Tree(Tree&& other) {
     root = (std::move(other.root));
 }
@@ -47,7 +57,7 @@ Parser::Parser(std::string str) : lexer(str) {
                 lexer.next_token();
                 auto tree_1 = std::invoke(parse_["S"]);
                 if (lexer.current_token() != Token::RB) {
-                    throw std::exception();
+                    throw parser_exception("Expected \')\', but found:" + lexer.current_string_token());
                 }
                 lexer.next_token();
                 auto tree_2 = std::invoke(parse_["S'"]);
@@ -62,8 +72,14 @@ Parser::Parser(std::string str) : lexer(str) {
                 Tree tree_2 = std::invoke(parse_["S'"]);
                 return Tree("S", Tree(cur), std::move(tree_2));
             }
+            case Token::RB:
+            case Token::And:
+            case Token::Or:
+            case Token::Xor:
+            case Token::End:
+                throw parser_exception("Unexpected symbol: " + lexer.current_string_token());
             default:
-                throw std::exception();
+                throw parser_exception(lexer.current_string_token() + " is not a token");
         }
     };
 
@@ -76,8 +92,14 @@ Parser::Parser(std::string str) : lexer(str) {
             case Token::Xor:
                 return parse_help("xor", "S'");
             case Token::RB:
-            default:
+            case Token::End:
                 return Tree("S'", Tree("eps"));
+            case Token::LB:
+            case Token::Var:
+            case Token::Not:
+                throw parser_exception("Unexpected symbol: " + lexer.current_string_token());
+            default:
+                throw parser_exception(lexer.current_string_token() + " is not a token");
         }
     };
 }

@@ -1,0 +1,26 @@
+#rules
+S  -> ( S ) S'
+S  -> not S S'
+S  -> a S'
+S  -> b S'
+S  -> c S'
+S' -> and S S'
+S' -> or S S'
+S' -> xor S S'
+S' -> eps
+#start
+S
+#non terminals
+S
+S'
+#terminals
+(
+)
+not
+and 
+or 
+xor 
+eps 
+a 
+b 
+c

@@ -25,6 +25,7 @@ set( res
     "page_style.css"
     "index.html"
     "treant-js"
+    "grammar.txt"
 )
 
 # do the copying

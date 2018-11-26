@@ -11,7 +11,10 @@
 #include "utility.h"
 #include <iostream>
 #include <cassert>
+
 struct Grammar {
+
+    Grammar() = default;
 
     Grammar(std::vector<std::string> rules_list,
             std::set<std::string> nonTerminals,
@@ -19,6 +22,9 @@ struct Grammar {
             std::string const& start);
 
     auto const& data() const;
+
+    Grammar& operator = (Grammar const&) = default;
+    Grammar& operator = (Grammar&& ) = default;
 
     std::map<std::string, std::set<std::string>> build_follow_set();
     std::map<std::string, std::set<std::string>> build_first_set();
