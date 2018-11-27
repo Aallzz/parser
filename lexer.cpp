@@ -10,7 +10,7 @@ Lexer::Lexer(std::string const& str) : iss(str + "$") {
     tokens_trie.add_string("$", Token::End);
     tokens_trie.add_string("a", Token::Var);
     tokens_trie.add_string("b", Token::Var);
-    tokens_trie.add_string("v", Token::Var);
+    tokens_trie.add_string("c", Token::Var);
 //    for (char i = 'a'; i <= 'z'; ++i) {
 //        tokens_trie.add_string(std::string(1, i), Token::Var);
 //    }

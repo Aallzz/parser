@@ -7,6 +7,7 @@
 #include <functional>
 #include "lexer.h"
 #include "grammar.h"
+#include "utility"
 #include <iostream>
 #include <iomanip>
 
@@ -33,6 +34,12 @@ struct Tree {
 
     Tree(Tree&& other);
     Tree(std::string value);
+
+    template<typename... Trees,
+             typename = std::enable_if_t<(!std::is_lvalue_reference_v<Trees> && ...)>>
+    void add_children(Trees&&... child) {
+        (root->push_node(std::move(child.root)),...);
+    }
 
     std::vector<std::string> data();
 
@@ -66,6 +73,7 @@ struct Parser {
 
     Tree parse();
     Tree parse(Grammar& grammar);
+    Tree parseR(Grammar& grammar);
 
 private:
 

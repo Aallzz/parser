@@ -22,10 +22,11 @@ enum class Token {
     End,
 };
 
-static constexpr std::string_view token_names[] {"END", "And", "Or", "Not", "Xor", "LB", "RB", "Var"};
+static constexpr std::string_view token_names[] {"END", "And", "Or", "Not", "Xor", "LB", "RB", "Var", "$"};
 
 struct Lexer {
 
+    Lexer() = default;
     Lexer(std::string const& str);
 
     Token next_token();

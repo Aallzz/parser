@@ -34,10 +34,15 @@ struct Grammar {
     bool is_nonTerminal(std::string const&);
 
     std::string get_start();
+    std::vector<std::string> get_terminals();
+    std::vector<std::string> get_nonTerminals();
+    std::vector<std::vector<std::string>> get_rules_for(std::string nt);
+
+    std::set<std::string> get_first(std::vector<std::string> const& s);
+    std::set<std::string> get_follow(std::string const& nt);
 
 private:
 
-    std::set<std::string> get_first(std::vector<std::string> const& s);
     std::set<std::size_t> get_first_raw(std::vector<std::string> const& s);
     std::map<std::size_t, std::set<std::size_t>>  build_follow_set_raw();
     std::map<std::size_t, std::set<std::size_t>>  build_first_set_raw();

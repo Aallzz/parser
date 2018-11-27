@@ -11,15 +11,28 @@
 
 using namespace std;
 
+
 //  string_expression = "a (";   // WA for S'
 //  string_expression = ")";
 //  string_expression = "a or b or c not (a and (a not b))";
 //  string_expression = "(a and b";
 //  string_expression = "(a and f) or not (c xor (a or not b))";
 
+//  string_expression = "((a and b) or not c) xor (a and not (b)) ";
+//  string_expression = "not not not not a";
+
 int main(int argc, char* argv[]) {
 
     std::string string_expression = "(a and c) or not (c xor (a or not b))";
+//    string_expression = "a";
+//      string_expression = "a (";   // WA for S'
+//      string_expression = ")";
+    //  string_expression = "a or b or c not (a and (a not b))";
+//      string_expression = "(a and b";
+    //  string_expression = "(a and f) or not (c xor (a or not b))";
+
+    //  string_expression = "((a and b) or not c) xor (a and not (b)) ";
+    //  string_expression = "not not not not a";
 
     Grammar grammar({
                         "S  -> ( S ) S'",
@@ -92,7 +105,7 @@ int main(int argc, char* argv[]) {
 
     Parser p(string_expression);;
     try {
-        auto tree = p.parse();
+        auto tree = p.parseR(grammar);
         ofstream fjsout("tree.js");
         fjsout << build_json_tree(tree.data()) << std::endl;
         ofstream follow_out("follow.js");

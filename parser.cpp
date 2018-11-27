@@ -127,11 +127,18 @@ Tree Parser::parse(Grammar& grammar) {
     while (!action.empty()) {
         std::string cur = action.back();
         action.pop_back();
-        if (grammar.is_nonTerminal(action.back())) {
+        if (grammar.is_nonTerminal(cur)) {
             if (!ll1_table.count(cur)) {
-                throw std::exception();
+                throw parser_exception("Cannot find ");
             }
-//            if (!ll1_table[cur].count())
+            if (!ll1_table[cur].count(lexer.current_string_token())) {
+                throw parser_exception("No rule found ");
+            }
+            std::vector<std::string> rl = ll1_table[cur][lexer.current_string_token()];
+            std::reverse(rl.begin(), rl.end());
+            for (auto const& e : rl) {
+                action.push_back(e);
+            }
         } else if (grammar.is_terminal(action.back())) {
             if (lexer.token_by_string(action.back()) == lexer.current_token()) {
                 lexer.next_token();
@@ -143,6 +150,48 @@ Tree Parser::parse(Grammar& grammar) {
         }
     }
     return tree;
+}
+
+Tree Parser::parseR(Grammar& grammar) {
+    grammar.build_first_set();
+    for (auto const& nt : grammar.get_nonTerminals()) {
+        parse_[nt] = [this, &grammar, nt]() mutable {
+            bool has_eps {false};
+            Tree res(nt);
+            for (auto const& tl : grammar.get_rules_for(nt)) {
+                has_eps |= grammar.get_first(tl).count("eps");
+                if (grammar.get_first(tl).count(lexer.current_string_token())) {
+                    for (auto const& v : tl) {
+                        if (grammar.is_nonTerminal(v)) {
+                            res.add_children(parse_[v]());
+                        } else if (grammar.is_terminal(v)) {
+                            // check?
+                            if (lexer.current_string_token() != v) {
+                                throw parser_exception("Expected \')\', but found:" + lexer.current_string_token());
+                            }
+                            lexer.next_token();
+                            res.add_children(Tree(v));
+                        } else {
+                            throw parser_exception(lexer.current_string_token() + " is not a token");
+                        }
+                    }
+                    return res;
+                }
+            }
+            if (has_eps) {
+                if (grammar.get_follow(nt).count(lexer.current_string_token())) {
+                    res.add_children(Tree("eps"));
+                } else {
+                    throw parser_exception("nexpected symbol: " + lexer.current_string_token());
+                }
+                return  res;
+            } else {
+                throw parser_exception("Unexpected symbol: " + lexer.current_string_token());
+            }
+        };
+    }
+    lexer.next_token();
+    return parse_[grammar.get_start()]();
 }
 
 //http://fperucic.github.io/treant-js/

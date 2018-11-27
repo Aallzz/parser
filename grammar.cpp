@@ -251,6 +251,32 @@ std::string Grammar::get_start() {
     return start;
 }
 
+std::vector<std::string> Grammar::get_terminals() {
+    auto temp = transform_index_by_rule(terminals);
+    return std::vector<std::string>(temp.begin(), temp.end());
+}
+
+std::vector<std::string> Grammar::get_nonTerminals() {
+    auto temp = transform_index_by_rule(nonTerminals);
+    return std::vector<std::string>(temp.begin(), temp.end());
+}
+
+
+std::vector<std::vector<std::string>> Grammar::get_rules_for(std::string nt) {
+    std::vector<std::vector<std::string>> res;
+    for (auto const& v : rules[index_by_rule(nt)]) {
+        res.push_back(rule_by_index(v));
+    }
+    return res;
+}
+
+std::set<std::string> Grammar::get_follow(std::string const& nt) {
+    if (follow_set.empty()) {
+        follow_set = build_follow_set_raw();
+    }
+    return transform_index_by_rule(follow_set[index_by_rule(nt)]);
+}
+
 std::set<std::string> Grammar::get_first(std::vector<std::string> const& s) {
     if (first_set.empty()) {
         first_set = build_follow_set_raw();
