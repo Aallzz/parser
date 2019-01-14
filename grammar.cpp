@@ -357,8 +357,199 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
         }
     }
 
-    return res;
+	return res;
 }
 
+std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::build_slr_table() {
+	using namespace std;
+	std::map<std::string, std::map<std::string, std::vector<std::string>>> result;
+	for (auto const& entitiy : parse_table) {
+		if (entitiy.second.first)
+			result[std::to_string(entitiy.first.first)][entitiy.first.second] = {(entitiy.second.first == 1 ? " reduce"s + " : " + entitiy.second.second + " "
+																					: entitiy.second.first == 2 ? " shift"s  + " : " + entitiy.second.second + " "
+																						: " accepted "s)};
+	}
+	return result;
+}
 
+std::map<std::string, std::set<std::string>> Grammar::get_closure(
+		std::map<std::string, std::set<std::string>> mp) {
+
+   std::map<std::string, std::set<std::string>> mp2 = mp;
+
+   while (true) {
+	   for (auto const& entity : mp) {
+		   std::set<std::string> rhs_rules = entity.second;
+		   for (auto const& rhs_rule_s : rhs_rules) {
+			   std::vector<std::string> rhs = split(rhs_rule_s, ' ');
+			   auto pos = std::find(rhs.begin(), rhs.end(), ".");
+			   if (pos == rhs.end()) {
+				   throw std::runtime_error("expected . in the production");
+			   }
+			   if (pos == std::prev(rhs.end())) {
+				   continue;
+			   }
+			   if (!is_nonTerminal(*std::next(pos))) {
+				   continue;
+			   }
+			   for (auto const& value : get_rules_for(*std::next(pos))) {
+				   if (value.size() == 1 && value[0] == "eps") {
+					   mp2[*std::next(pos)].insert(".");
+				   } else {
+					   mp2[*std::next(pos)].insert(". " + join(value, ' '));
+				   }
+			   }
+		   }
+	   }
+	   if (mp == mp2) {
+		   return mp;
+	   }
+	   mp = mp2;
+   }
+}
+
+std::map<std::string, std::set<std::string>> Grammar::get_goto(std::map<std::string, std::set<std::string>> const& block, std::string const& symbol) {
+
+	if (goto_table_cache.count({block, symbol})) {
+		return goto_table_cache[{block, symbol}];
+	}
+
+	std::map<std::string, std::set<std::string>>& result = goto_table_cache[{block, symbol}];
+
+	for (auto const& entity : block) {
+		for (auto const& rhs_rule_s : entity.second) {
+			auto rhs_rule = split(rhs_rule_s, ' ');
+			auto dot_pos = std::find(rhs_rule.begin(), rhs_rule.end(), ".");
+			if (dot_pos == rhs_rule.end()) {
+				throw std::runtime_error("expected . in the production");
+			}
+			if (std::next(dot_pos) != rhs_rule.end() &&
+					*std::next(dot_pos) == symbol) {
+				std::iter_swap(dot_pos, std::next(dot_pos));
+
+				auto block_closure = get_closure({{entity.first, {join(rhs_rule, ' ')}}});
+				for (auto const& cl_entity : block_closure) {
+					for (auto const& rhs_rule_s2 : cl_entity.second) {
+						result[cl_entity.first].insert(rhs_rule_s2);
+					}
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+std::map<std::size_t, std::map<std::string, std::set<std::string> > > Grammar::build_goto_table() {
+	std::size_t curidx {};
+	goto_table[curidx++] = get_closure({{start, {". " + join(get_rules_for(start)[0], ' ')}}});
+	goto_table_inv[goto_table[0]] = 0;
+	while (true) {
+		bool updated {false};
+		for (auto const& entity : goto_table) {
+			auto const& block = entity.second;
+			for (auto const& term : get_terminals()) {
+			   auto nxt = get_goto(block, term);
+			   if (!nxt.empty() && !goto_table_inv.count(nxt)) {
+					goto_table[curidx] = nxt;
+					goto_table_inv[nxt] = curidx++;
+					updated = true;
+			   }
+			}
+			for (auto const& nterm : get_nonTerminals()) {
+			   auto nxt = get_goto(block, nterm);
+			   if (!nxt.empty() && !goto_table_inv.count(nxt)) {
+					goto_table[curidx] = nxt;
+					goto_table_inv[nxt] = curidx++;
+					updated = true;
+			   }
+			}
+		}
+		if (!updated) {
+			return goto_table;
+		}
+	}
+}
+
+/*
+ * actions:
+ * reduce - 1
+ * shift  - 2
+ * accept - 3
+ */
+
+std::pair<std::size_t, std::string> Grammar::get_action(std::size_t id, std::string symbol) {
+
+//	if (parse_table.count({id, symbol})) {
+//		return  parse_table[{id, symbol}];
+//	}
+
+	for (auto const& entity : goto_table[id]) {
+		for (auto const& rhs_rule_s : entity.second) {
+			auto rhs = split(rhs_rule_s, ' ');
+			auto dot_pos = std::find(rhs.begin(), rhs.end(), ".");
+			if (dot_pos == rhs.end()) {
+				continue;
+			}
+			if (std::next(dot_pos) != rhs.end() &&
+					*std::next(dot_pos) == symbol) {
+				for (auto const& block : goto_table) {
+					if (get_goto(goto_table[id], symbol) == block.second) {
+						auto& action = parse_table[{id, symbol}];
+						if (is_terminal(symbol)) {
+							if (action.first == 1) {
+								throw std::runtime_error("Shift-Reduce Conflict {" + std::to_string(id) + ", " + symbol + "}");
+							}
+							action = {2, std::to_string(goto_table_inv[block.second])};
+						} else if (is_nonTerminal(symbol)) {
+							action = {2, std::to_string(goto_table_inv[block.second])};
+						} else {
+							throw std::runtime_error(symbol + " is not either terminal or nonTerminal");
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+	for (auto const& entity : goto_table[id]) {
+		if (entity.first == start) {
+			continue;
+		}
+		for (auto const& rhs_rule_s : entity.second) {
+			auto dotted_rhs = split(rhs_rule_s, ' ');
+			if (dotted_rhs.back() != ".") {
+				continue;
+			}
+			for (auto const& nonTerminal : get_nonTerminals()) {
+				for (auto const& rhs : get_rules_for(nonTerminal)) {
+					if (entity.first == nonTerminal &&
+							(std::equal(rhs.begin(), rhs.end(), dotted_rhs.begin()) ||
+							 (rhs.size() == 1 && rhs[0] == "eps" && dotted_rhs.size() == 1 && dotted_rhs[0] == ".")) &&
+							(symbol == "$" || is_terminal(symbol))) {
+						std::string rule = nonTerminal + " -> " + join(rhs, ' ');
+						for (auto const& term : get_follow(entity.first)) {
+							auto& action = parse_table[{id, term}];
+							if (action.first == 2) {
+								throw std::runtime_error("Shift-Reduce Conflict {" + std::to_string(id) + ", " + term + "}");
+							}
+							if (action.first != 0 &&
+									(action.first != 1 || action.second != rule)) {
+								throw std::runtime_error("Reduce-Reduce Conflict in {" + std::to_string(id) + ", " + term + "}");
+							}
+							action = {1, rule};
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (goto_table[id].count(start) && goto_table[id][start].count(join(get_rules_for(start)[0], ' ') + " .")) {
+		parse_table[{id, "$"}] = {3, ""};
+	}
+
+	return parse_table[{id, symbol}];
+}
 

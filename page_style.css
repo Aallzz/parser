@@ -67,6 +67,7 @@ h1 {
 .move_table_wrapper {
   padding-top : 20px;
   overflow-x : auto;
+  overflow-y : auto;
   height : 60%;
   background-color: #ff9922;
   border-color: black;
@@ -77,13 +78,14 @@ h1 {
 .move_table {
   background-color: #ff9922;
   display: table;
-  overflow: auto;
+  table-layout: fixed;
+  overflow-y: scroll;
+  overflow-x: auto;
   height: 60%;
   border: 1px;
   margin: 0px auto;
   border:1px solid;
-  text-align:center
-  overflow-x: auto;
+  text-align:center;
 }
 
 .move_table_tbody {
@@ -93,6 +95,7 @@ h1 {
 }
 
 .td-move_table {
+  white-space: nowrap;
   border: solid 1px;
   height: 40px;
 }

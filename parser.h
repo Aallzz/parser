@@ -10,6 +10,7 @@
 #include "utility"
 #include <iostream>
 #include <iomanip>
+#include <stack>
 
 
 struct parser_exception : public std::exception {
@@ -22,7 +23,6 @@ protected:
     std::string msg_;
 };
 
-
 struct Tree {
 
     template<typename... Trees,
@@ -32,7 +32,8 @@ struct Tree {
         (root->push_node(std::move(cdren.root)),...);
     }
 
-    Tree(Tree&& other);
+	Tree(Tree&& other);
+
     Tree(std::string value);
 
     template<typename... Trees,
@@ -69,18 +70,21 @@ private:
 
 struct Parser {
 
-    Parser(std::string str);
+	Parser(std::string str);
+	Parser(std::string str, std::vector<std::string> const& t);
 
-    Tree parse();
-    Tree parse(Grammar& grammar);
-    Tree parseR(Grammar& grammar);
+//    Tree parse(Grammar& grammar);
+	Tree parseLR(Grammar& grammar);
+
+	Tree parseSLR(Grammar& grammar);
 
 private:
 
-    Tree parse_help(std::string operation, std::string ntroot);
-
     std::map<std::string, std::function<Tree(void)>> parse_;
-    Lexer lexer;
+	Lexer lexer;
+
+	/// building actiong and goto tables ///
+
 };
 
 #endif // PARSER_H

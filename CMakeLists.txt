@@ -26,6 +26,8 @@ set( res
     "index.html"
     "treant-js"
     "grammar.txt"
+    "grammar2.txt"
+    "grammar3.txt"
 )
 
 # do the copying

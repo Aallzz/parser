@@ -214,3 +214,12 @@ std::vector<std::string> split(std::string s, char c) {
     return res;
 }
 
+
+std::string join(std::vector<std::string> values, char separator) {
+	std::string result = *(values.begin());
+	for (auto it = std::next(values.begin()); it != values.end(); ++it) {
+		result += separator;
+		result += *it;
+	}
+	return result;
+}

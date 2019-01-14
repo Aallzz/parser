@@ -11,9 +11,12 @@ Lexer::Lexer(std::string const& str) : iss(str + "$") {
     tokens_trie.add_string("a", Token::Var);
     tokens_trie.add_string("b", Token::Var);
     tokens_trie.add_string("c", Token::Var);
-//    for (char i = 'a'; i <= 'z'; ++i) {
-//        tokens_trie.add_string(std::string(1, i), Token::Var);
-//    }
+}
+
+Lexer::Lexer(std::string const& str, std::vector<std::string> const& v) : Lexer(str) {
+    for (auto const& s : v) {
+        tokens_trie.add_string(s, Token::Smth);
+    }
 }
 
 Token Lexer::next_token() {

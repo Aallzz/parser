@@ -20,4 +20,6 @@ std::string trim(std::string str);
 std::pair<std::string, std::string> get_browser_arguments();
 
 std::vector<std::string> split(std::string, char);
+std::string join(std::vector<std::string>, char);
+
 #endif // UTILITY_H

@@ -12,46 +12,123 @@
 using namespace std;
 
 
-//  string_expression = "a (";   // WA for S'
-//  string_expression = ")";
-//  string_expression = "a or b or c not (a and (a not b))";
-//  string_expression = "(a and b";
-//  string_expression = "(a and f) or not (c xor (a or not b))";
-
-//  string_expression = "((a and b) or not c) xor (a and not (b)) ";
-//  string_expression = "not not not not a";
-
 int main(int argc, char* argv[]) {
 
-    std::string string_expression = "(a and c) or not (c xor (a or not b))";
-//    string_expression = "a";
-//      string_expression = "a (";   // WA for S'
-//      string_expression = ")";
-    //  string_expression = "a or b or c not (a and (a not b))";
-//      string_expression = "(a and b";
-    //  string_expression = "(a and f) or not (c xor (a or not b))";
+	std::string string_expression = "id + id * (id * (id) + id)";    // OK
 
-    //  string_expression = "((a and b) or not c) xor (a and not (b)) ";
-    //  string_expression = "not not not not a";
+    // original grammar //
+    /*
+       S -> O
+       O -> X or X
+       O -> X
+       X -> A xor A
+       X -> A
+       A -> R and R
+       A -> R
+       R -> L shr L
+       R -> L
+       L -> N shl N
+       L -> N
+       N -> not V
+       N -> V
+       V -> a
+       V -> b
+       V -> c
+       V -> (S)
+    */
 
-    Grammar grammar({
-                        "S  -> ( S ) S'",
-                        "S  -> not S S'",
-                        "S  -> a S'",
-                        "S  -> b S'",
-                        "S  -> c S'",
-                        "S' -> and S S'",
-                        "S' -> or S S'",
-                        "S' -> xor S S'",
-                        "S' -> eps"
-                    },
-                    {
-                        "S", "S'", "Var"
-                    },
-                    {
-                        "(", ")", "not", "and", "or", "xor", "eps", "a", "b", "c"
-                    },
-                    "S");
+//    Grammar grammar({
+//                        "S -> O",
+
+//                        "O -> X O'",
+//                        "O' -> or O",
+//                        "O' -> eps",
+
+//                        "X -> A X'",
+//                        "X' -> xor X",
+//                        "X' -> eps",
+
+//                        "A -> N A'",
+//                        "A' -> and A",
+//                        "A' -> eps",
+
+//                        "R -> L R'",
+//                        "R' -> shl R",
+//                        "R' -> eps",
+
+//                        "L -> N L'",
+//                        "L' -> shr L",
+//                        "L' -> eps",
+
+//                        "N -> not V",
+//                        "N -> V",
+
+//                        "V -> a",
+//                        "V -> b",
+//                        "V -> c",
+//                        "V -> ( S )"
+//                    },
+//                    {
+//                        "S", "N", "A", "O", "X", "V", "R", "L",
+//                        "S'", "A'", "O'", "X'", "R'", "L'"
+//                    },
+//                    {
+//                        "(", ")", "not", "and", "or", "xor", "eps", "a", "b", "c", "shr", "shl"
+//                    },
+//                    "S");
+
+	Grammar grammar({
+						"X -> E",
+						"E -> E + T",
+						"E -> T",
+						"T -> T * F",
+						"T -> F",
+						"F -> ( E )",
+						"F -> id",
+					},
+					{
+						"X", "E", "T", "F"
+					},
+					{
+						"id", "(", ")", "eps", "+", "*"
+					},
+					"X"
+					);
+
+////	Reduce-Reduce Conflict
+//	Grammar grammar({
+//						"S' -> S",
+//						"S 	-> 	e B b",
+//						"S 	-> 	e A",
+//						"A 	-> 	a",
+//						"A 	-> 	eps",
+//						"B 	-> 	a",
+//						"B 	-> 	a D",
+//						"D 	-> 	b",
+//					},
+//					{
+//						"S'", "S", "B", "A", "D"
+//					},
+//					{
+//						"e", "a", "b", "eps",
+//					},
+//					"S'");
+
+//	Grammar grammar({
+//						"S -> E",
+//						"E -> L = R",
+//						"E -> R",
+//						"L -> id",
+//						"L -> * R",
+//						"R -> L"
+//					},
+//					{
+//						"S", "E", "L", "R"
+//					},
+//					{
+//						"id", "*", "=", "eps"
+//					},
+//					"S");
 
     if (argc >= 2) {
         string_expression = string(argv[1]);
@@ -100,120 +177,96 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    ofstream parser_out("parser_string.js");
-    parser_out << "function parser_string() { document.getElementById('parser_string_place').innerHTML = '"s + string_expression + "';}\nparser_string();" << std::endl;
 
-    Parser p(string_expression);;
-    try {
-        auto tree = p.parseR(grammar);
-        ofstream fjsout("tree.js");
-        fjsout << build_json_tree(tree.data()) << std::endl;
-        ofstream follow_out("follow.js");
-        follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
-        ofstream first_out("first.js");
-        first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
-        ofstream move_table_out("move_table.js");
-        move_table_out << build_json_map(grammar.build_ll1_table(), "move_table") << std::endl;
+	try {
+	auto xxxx = grammar.build_goto_table();
 
-        pid_t pid = fork();
+	cout << "Size = " << xxxx.size() << endl;
 
-        if (pid < 0) {
-            std::cerr << "Cannot fork process" << std::endl;
-            return 0;
-        }
+	for (auto const& entity : xxxx) {
+		cout << entity.first << endl;
+		for (auto const& rules : entity.second) {
+			for (auto const& rhs_rule : rules.second) {
+				cout << "       " + rules.first << " -> " <<
+						rhs_rule << endl;
+			}
+		}
+	}
 
-        auto browser_args = get_browser_arguments();
-        char* arguments[] = {browser_args.first.data(), browser_args.second.data(), nullptr};
-        if (pid == 0) {
-            if (execvp(arguments[0], arguments) < 0) {
-                return -1;
-            }
-            return 0;
-        } else {
-            int status;
-            while (wait(&status) != pid) {
-            }
-        }
-    } catch (parser_exception& e) {
-        cout << e.what() << endl;
-    }
+	cout << string(33, '-') << endl << endl;
+
+	for (auto const& entity : xxxx) {
+		cout << entity.first << " : " << endl;
+		for (std::string const& value : grammar.get_terminals()) {
+			auto temp = grammar.get_action(entity.first, value);
+
+			cout << "       ";
+			cout << value << " ";
+			cout << temp.first << " " << temp.second << endl;
+		}
+
+		for (std::string const& value : grammar.get_nonTerminals()) {
+			auto temp = grammar.get_action(entity.first, value);
+
+			cout << "       ";
+			cout << value << " ";
+			cout << temp.first << " " << temp.second << endl;
+		}
+
+		cout << "       " << "$ " << grammar.get_action(entity.first, "$").first << " " << grammar.get_action(entity.first, "$").second << endl;
+	}
+
+	} catch (std::exception& e) {
+
+	}
+
+	ofstream parser_out("parser_string.js");
+	parser_out << "function parser_string() { document.getElementById('parser_string_place').innerHTML = '"s + string_expression + "';}\nparser_string();" << std::endl;
+
+	Parser p(string_expression, grammar.get_terminals());;  // for provided grammar
+//    Parser p(string_expression);                              // for pascal logic
+	ofstream fjsout("tree.js");
+	ofstream move_table_out("move_table.js");
+
+	try {
+		auto tree = p.parseSLR(grammar);    // for provided grammar
+//        auto tree = p.parse();              // for pascal logic
+
+		fjsout << build_json_tree(tree.data()) << std::endl;
+		move_table_out << build_json_map(grammar.build_slr_table(), "move_table") << std::endl;
+
+	} catch (parser_exception& e ) {
+		cout << string_expression << ": ";
+		cout << e.what() << endl;
+	} catch (std::runtime_error& e) {
+		cout << string_expression << ": ";
+		cout << e.what() << endl;
+	}
+
+	ofstream follow_out("follow.js");
+	follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
+	ofstream first_out("first.js");
+	first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
+
+	pid_t pid = fork();
+
+	if (pid < 0) {
+		std::cerr << "Cannot fork process" << std::endl;
+		return 0;
+	}
+
+	auto browser_args = get_browser_arguments();
+	char* arguments[] = {browser_args.first.data(), browser_args.second.data(), nullptr};
+	if (pid == 0) {
+		if (execvp(arguments[0], arguments) < 0) {
+			return -1;
+		}
+		return 0;
+	} else {
+		int status;
+		while (wait(&status) != pid) {
+		}
+	}
+
     return 0;
 }
-
-
-/* S  -> (S) S'
- * S  -> not S S'
- * S  -> Var S'
- * S' -> and S S'
- * S' -> or S S'
- * S' -> xor S S'
- * S' -> eps
- */
-
-
-//    Grammar grammar({
-//                     "S  -> ( S ) S'",
-//                     "S  -> not S S'",
-//                     "S  -> Var S'",
-//                     "S' -> and S S'",
-//                     "S' -> or S S'",
-//                     "S' -> xor S S'",
-//                     "S' -> eps",
-//                     "Var -> a",
-//                     "Var -> b",
-//                     "Var -> c"
-//                    },
-//                    {
-//                     "S", "S'", "Var"
-//                    },
-//                    {
-//                     "(", ")", "not", "and", "or", "xor", "eps", "a", "b", "c"
-//                    },
-//                    "S");
-
-//        Grammar grammar({
-//                            "E -> T E'",
-//                            "E' -> + T E'",
-//                            "E' -> eps",
-//                            "T -> F T'",
-//                            "T' -> * F T'",
-//                            "T' -> eps",
-//                            "F -> a",
-//                            "F -> b",
-//                            "F -> c",
-//                            "F -> d",
-//                            "F -> e",
-//                            "F -> f",
-//                            "F -> g",
-//                            "F -> n",
-//                            "F -> ( E )"
-//                        },
-//                        {
-//                            "E", "E'", "T", "T'", "F"
-//                        },
-//                        {
-//                            "(", ")", "n", "-", "+", "*", "+", "eps", "$", "a", "b", "c", "d", "e", "f", "g"
-//                        },
-//                        "E");
-
-//        Grammar grammar ({
-//                             "E -> T X",
-//                             "X -> + T X",
-//                             "X -> - T X",
-//                             "X -> eps",
-//                             "T -> F Y",
-//                             "Y -> * F Y",
-//                             "Y -> eps",
-//                             "F -> - F",
-//                             "F -> + F",
-//                             "F -> n",
-//                             "F -> ( E )"
-//                         },
-//                         {
-//                            "E", "E'", "T", "T'", "F"
-//                         },
-//                         {
-//                            "+", "-", "*", "n", "(", ")", "eps", "$"
-//                         },
-//                         "E"
-//                         );

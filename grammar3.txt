@@ -1,0 +1,29 @@
+#rules
+A -> M A'
+A' -> + M A'
+A' -> - M A'
+A' -> eps
+M -> Q M'
+M' -> * Q M'
+M' -> eps
+Q -> E
+Q -> - E
+E -> ( A )
+E -> n
+#start
+A
+#non terminals
+A
+A'
+M
+M'
+Q
+E
+#terminals
+eps
++
+*
+-
+(
+)
+n

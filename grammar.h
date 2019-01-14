@@ -1,4 +1,4 @@
-#ifndef GRAMMAR_H
+﻿#ifndef GRAMMAR_H
 #define GRAMMAR_H
 
 #include <string>
@@ -29,6 +29,7 @@ struct Grammar {
     std::map<std::string, std::set<std::string>> build_follow_set();
     std::map<std::string, std::set<std::string>> build_first_set();
     std::map<std::string, std::map<std::string, std::vector<std::string>>> build_ll1_table();
+	std::map<std::string, std::map<std::string, std::vector<std::string>>> build_slr_table();
 
     bool is_terminal(std::string const&);
     bool is_nonTerminal(std::string const&);
@@ -41,6 +42,19 @@ struct Grammar {
     std::set<std::string> get_first(std::vector<std::string> const& s);
     std::set<std::string> get_follow(std::string const& nt);
 
+	// get set of rules and produces block for automata for slr tables
+	std::map<std::string, std::set<std::string>> get_closure(
+			std::map<std::string, std::set<std::string>> mp);
+
+
+	std::map<std::string, std::set<std::string>> get_goto(
+			std::map<std::string, std::set<std::string>> const& block,
+			std::string const& symbol);
+
+	std::map<std::size_t, std::map<std::string, std::set<std::string>>> build_goto_table();
+
+	std::pair<std::size_t, std::string> get_action(std::size_t id, std::string symbol);
+
 private:
 
     std::set<std::size_t> get_first_raw(std::vector<std::string> const& s);
@@ -49,7 +63,8 @@ private:
 
     std::set<std::string> transform_index_by_rule(std::set<std::size_t> st);
     std::map<std::string, std::set<std::string>> transform_index_by_rule(std::map<std::size_t, std::set<std::size_t>>);
-    size_t index_by_rule(std::vector<std::string> const&);
+
+	size_t index_by_rule(std::vector<std::string> const&);
     size_t index_by_rule(std::string const& entity);
 
     std::vector<std::string> rule_by_index(std::size_t id);
@@ -67,35 +82,14 @@ private:
     std::map<std::size_t, std::set<std::size_t>> first_set;
     std::map<std::size_t, std::set<std::size_t>> follow_set;
 
+	std::map<std::pair<
+				std::map<std::string, std::set<std::string>>,
+				std::string
+				>,std::map<std::string, std::set<std::string>>> goto_table_cache;
+
+	std::map<std::size_t, std::map<std::string, std::set<std::string>>> goto_table;
+	std::map<std::map<std::string, std::set<std::string>>, std::size_t> goto_table_inv;
+	std::map<std::pair<std::size_t, std::string>, std::pair<std::size_t, std::string>> parse_table;
 };
 
 #endif // GRAMMAR_H
-
-/* S -> S and S
- * S -> S or S
- * S -> (S)
- * S -> not S
- * S -> Var
- */
-
-/* S -> (S)A
- * S -> (S)
- * S -> not S A
- * S -> not S
- * S -> Var A
- * S -> Var
- * A -> and S A
- * A -> and S
- * A -> or S A
- * A -> or S
-*/
-
-
-/* S  -> (S) S'
- * S  -> not S S'
- * S  -> Var S'
- * A  -> and S S'
- * A  -> or S S'
- * S' -> A
- * S' -> eps
- */
