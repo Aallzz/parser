@@ -5,14 +5,18 @@ E -> T
 T -> T * F
 T -> F
 F -> ( E )
-F -> id
+F -> a
+F -> b
+F -> c
 #non terminals
 X
 E
 T
 F
 #terminals
-id
+a
+b
+c
 (
 )
 eps

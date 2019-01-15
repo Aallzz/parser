@@ -15,7 +15,8 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
 	std::string string_expression = "id + id * (id * (id) + id)";    // OK
-
+	std::string grammar_expect_type = "SLR";
+//	std::string string_expression = "a or b and c";
     // original grammar //
     /*
        S -> O
@@ -37,45 +38,45 @@ int main(int argc, char* argv[]) {
        V -> (S)
     */
 
-//    Grammar grammar({
-//                        "S -> O",
+//	Grammar grammar({
+//						"S -> O",
 
-//                        "O -> X O'",
-//                        "O' -> or O",
-//                        "O' -> eps",
+//						"O -> X O'",
+//						"O' -> or O",
+//						"O' -> eps",
 
-//                        "X -> A X'",
-//                        "X' -> xor X",
-//                        "X' -> eps",
+//						"X -> A X'",
+//						"X' -> xor X",
+//						"X' -> eps",
 
-//                        "A -> N A'",
-//                        "A' -> and A",
-//                        "A' -> eps",
+//						"A -> N A'",
+//						"A' -> and A",
+//						"A' -> eps",
 
-//                        "R -> L R'",
-//                        "R' -> shl R",
-//                        "R' -> eps",
+//						"R -> L R'",
+//						"R' -> shl R",
+//						"R' -> eps",
 
-//                        "L -> N L'",
-//                        "L' -> shr L",
-//                        "L' -> eps",
+//						"L -> N L'",
+//						"L' -> shr L",
+//						"L' -> eps",
 
-//                        "N -> not V",
-//                        "N -> V",
+//						"N -> not V",
+//						"N -> V",
 
-//                        "V -> a",
-//                        "V -> b",
-//                        "V -> c",
-//                        "V -> ( S )"
-//                    },
-//                    {
-//                        "S", "N", "A", "O", "X", "V", "R", "L",
-//                        "S'", "A'", "O'", "X'", "R'", "L'"
-//                    },
-//                    {
-//                        "(", ")", "not", "and", "or", "xor", "eps", "a", "b", "c", "shr", "shl"
-//                    },
-//                    "S");
+//						"V -> a",
+//						"V -> b",
+//						"V -> c",
+//						"V -> ( S )"
+//					},
+//					{
+//						"S", "N", "A", "O", "X", "V", "R", "L",
+//						"S'", "A'", "O'", "X'", "R'", "L'"
+//					},
+//					{
+//						"(", ")", "not", "and", "or", "xor", "eps", "a", "b", "c", "shr", "shl"
+//					},
+//					"S");
 
 	Grammar grammar({
 						"X -> E",
@@ -141,13 +142,15 @@ int main(int argc, char* argv[]) {
         std::string line;
         std::string section;
         std::string start;
-        while (getline(in_grammar, line)) {
+		while (getline(in_grammar, line)) {
             if (line.empty()) continue;
             if (line[0] == '#') {
                 section = line.substr(1);
-            } else {
+			} else if (line[0] == '@') {
+				grammar_expect_type = std::string(std::next(line.begin()), line.end());
+			} else {
                 gr[section].push_back(trim(line));
-            }
+			}
         }
 
         if (gr["rules"].empty()) {
@@ -178,75 +181,86 @@ int main(int argc, char* argv[]) {
     }
 
 
-	try {
-	auto xxxx = grammar.build_goto_table();
+//	try {
+//	auto xxxx = grammar.build_goto_table();
 
-	cout << "Size = " << xxxx.size() << endl;
+//	cout << "Size = " << xxxx.size() << endl;
 
-	for (auto const& entity : xxxx) {
-		cout << entity.first << endl;
-		for (auto const& rules : entity.second) {
-			for (auto const& rhs_rule : rules.second) {
-				cout << "       " + rules.first << " -> " <<
-						rhs_rule << endl;
-			}
-		}
-	}
+//	for (auto const& entity : xxxx) {
+//		cout << entity.first << endl;
+//		for (auto const& rules : entity.second) {
+//			for (auto const& rhs_rule : rules.second) {
+//				cout << "       " + rules.first << " -> " <<
+//						rhs_rule << endl;
+//			}
+//		}
+//	}
 
-	cout << string(33, '-') << endl << endl;
+//	cout << string(33, '-') << endl << endl;
 
-	for (auto const& entity : xxxx) {
-		cout << entity.first << " : " << endl;
-		for (std::string const& value : grammar.get_terminals()) {
-			auto temp = grammar.get_action(entity.first, value);
+//	for (auto const& entity : xxxx) {
+//		cout << entity.first << " : " << endl;
+//		for (std::string const& value : grammar.get_terminals()) {
+//			auto temp = grammar.get_action(entity.first, value);
 
-			cout << "       ";
-			cout << value << " ";
-			cout << temp.first << " " << temp.second << endl;
-		}
+//			cout << "       ";
+//			cout << value << " ";
+//			cout << temp.first << " " << temp.second << endl;
+//		}
 
-		for (std::string const& value : grammar.get_nonTerminals()) {
-			auto temp = grammar.get_action(entity.first, value);
+//		for (std::string const& value : grammar.get_nonTerminals()) {
+//			auto temp = grammar.get_action(entity.first, value);
 
-			cout << "       ";
-			cout << value << " ";
-			cout << temp.first << " " << temp.second << endl;
-		}
+//			cout << "       ";
+//			cout << value << " ";
+//			cout << temp.first << " " << temp.second << endl;
+//		}
 
-		cout << "       " << "$ " << grammar.get_action(entity.first, "$").first << " " << grammar.get_action(entity.first, "$").second << endl;
-	}
+//		cout << "       " << "$ " << grammar.get_action(entity.first, "$").first << " " << grammar.get_action(entity.first, "$").second << endl;
+//	}
 
-	} catch (std::exception& e) {
+//	} catch (std::exception& ) {
 
-	}
+//	}
 
+
+	ofstream follow_out("follow.js");
+	ofstream first_out("first.js");
 	ofstream parser_out("parser_string.js");
-	parser_out << "function parser_string() { document.getElementById('parser_string_place').innerHTML = '"s + string_expression + "';}\nparser_string();" << std::endl;
-
-	Parser p(string_expression, grammar.get_terminals());;  // for provided grammar
-//    Parser p(string_expression);                              // for pascal logic
 	ofstream fjsout("tree.js");
 	ofstream move_table_out("move_table.js");
 
-	try {
-		auto tree = p.parseSLR(grammar);    // for provided grammar
-//        auto tree = p.parse();              // for pascal logic
+	first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
+	follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
 
-		fjsout << build_json_tree(tree.data()) << std::endl;
-		move_table_out << build_json_map(grammar.build_slr_table(), "move_table") << std::endl;
+	Parser p(grammar);
 
-	} catch (parser_exception& e ) {
-		cout << string_expression << ": ";
-		cout << e.what() << endl;
-	} catch (std::runtime_error& e) {
-		cout << string_expression << ": ";
-		cout << e.what() << endl;
+	if (grammar_expect_type == "SLR") {
+		try {
+			move_table_out << build_json_map(grammar.build_slr_table(), "move_table") << std::endl;
+			auto tree = p.parseSLR(string_expression);
+			fjsout << build_json_tree(tree.data()) << std::endl;
+			parser_out << build_json_header(string_expression + " [ SLR ] ") << std::endl;
+		} catch (parser_exception& e ) {
+			parser_out << build_json_header(string_expression + ": "s + e.what()) << endl;
+		} catch (std::runtime_error& e) {
+			parser_out << build_json_header(string_expression + ": "s + e.what()) << endl;
+		}
+	} else if (grammar_expect_type == "LL(1)") {
+		try {
+			auto tree = p.parseLL1(string_expression);
+			fjsout << build_json_tree(tree.data()) << std::endl;
+			move_table_out << build_json_map(grammar.build_ll1_table(), "move_table") << std::endl;
+			parser_out << build_json_header(string_expression + " [ LL(1) ] ") << std::endl;
+		} catch (parser_exception& e ) {
+			parser_out << build_json_header(string_expression + ": " + e.what()) << endl;
+		} catch (std::runtime_error& e) {
+			parser_out << build_json_header(string_expression + ": " + e.what()) << endl;
+		}
+	} else {
+		parser_out << build_json_header(string_expression + ": " + "Unknow grammar type : " + grammar_expect_type) << endl;
 	}
 
-	ofstream follow_out("follow.js");
-	follow_out << build_json_map(grammar.build_follow_set(), "follow") << std::endl;
-	ofstream first_out("first.js");
-	first_out << build_json_map(grammar.build_first_set(), "first") << std::endl;
 
 	pid_t pid = fork();
 

@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <map>
 
+std::string build_json_header(std::string const& header);
 std::string build_json_tree(std::vector<std::string> const& tree);
 std::string build_json_map(std::map<std::string, std::set<std::string>> const& mp, std::string where);
 std::string build_json_map(std::map<std::string, std::map<std::string, std::vector<std::string>>> const& mp, std::string where);

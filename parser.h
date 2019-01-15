@@ -70,18 +70,14 @@ private:
 
 struct Parser {
 
-	Parser(std::string str);
-	Parser(std::string str, std::vector<std::string> const& t);
-
-//    Tree parse(Grammar& grammar);
-	Tree parseLR(Grammar& grammar);
-
-	Tree parseSLR(Grammar& grammar);
+	Parser(Grammar const& g);
+	Tree parseLL1(std::string const& str);
+	Tree parseSLR(std::string const& str);
 
 private:
 
     std::map<std::string, std::function<Tree(void)>> parse_;
-	Lexer lexer;
+	Grammar grammar;
 
 	/// building actiong and goto tables ///
 

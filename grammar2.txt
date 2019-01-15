@@ -1,37 +1,43 @@
 #rules
-E -> T E'
-E' -> + T E'
-E' -> eps
-T -> F T'
-T' -> * F T'
-T' -> eps
-F -> a
-F -> b
-F -> c
-F -> d
-F -> e
-F -> f
-F -> g
-F -> n
-F -> ( E )
-#start
-E
+S -> O
+O -> X or X
+O -> X
+X -> A xor A
+X -> A
+A -> R and R
+A -> R
+R -> L shr L
+R -> L
+L -> N shl N
+L -> N
+N -> not V
+N -> V
+V -> a
+V -> b
+V -> c
+V -> (S)
 #non terminals
-E
-E'
-T
-T'
-F
+S
+O
+X
+A
+R
+L
+N
+V
 #terminals
-eps
-+
-*
+or
+xor
+and
+shr
+shl
+not
+a
+b
+c
 (
 )
-a 
-b 
-c
-d
-e
-f
-g
+eps
+#start
+S
+@SLR

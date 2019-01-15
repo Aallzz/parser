@@ -223,3 +223,8 @@ std::string join(std::vector<std::string> values, char separator) {
 	}
 	return result;
 }
+
+std::string build_json_header(const std::string &header) {
+	using namespace std;
+	return "function parser_string() { document.getElementById('parser_string_place').innerHTML = '"s + header + "';}\nparser_string();";
+}

@@ -332,9 +332,13 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
             for (auto const& t : fst_suf) {
                 if (t == "eps") {
                     for (std::size_t tt_id : follow_set[index_by_rule(nt)]) {
-                        res[nt][rule_by_index(tt_id)[0]] = rhs;
+						if (!res[nt][rule_by_index(tt_id)[0]].empty() && res[nt][rule_by_index(tt_id)[0]] != rhs)
+							throw std::runtime_error("NOT LL(1) Grammar: Conflict in {" + nt + ", " + rule_by_index(tt_id)[0] + "} move");
+						res[nt][rule_by_index(tt_id)[0]] = rhs;
                     }
-                }
+				}
+				if (!res[nt][t].empty() && res[nt][t] != rhs)
+					throw  std::runtime_error("NOT LL(1) Grammar: Conflict in {" + nt + ", " + t + "} move");
                 res[nt][t] = rhs;
             }
 
@@ -347,9 +351,11 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
                 for (auto const& terminal : get_first(w_follow)) {
                     if (res[nt].count(terminal)) {
                         if (res[nt][terminal] != rhs) {
-                            throw std::exception();
+							throw std::runtime_error("NOT LL(1) Grammar: Conflict in {" + nt + ", " + terminal + "} move");
                         }
                     }
+					if (!res[nt][terminal].empty() && res[nt][terminal] != rhs)
+						throw  std::runtime_error("NOT LL(1) Grammar: Conflict in {" + nt + ", " + terminal + "} move");
                     res[nt][terminal] = rhs;
                 }
                 w_follow.pop_back();
@@ -362,6 +368,7 @@ std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::
 
 std::map<std::string, std::map<std::string, std::vector<std::string>>> Grammar::build_slr_table() {
 	using namespace std;
+	prepare_parse_table();
 	std::map<std::string, std::map<std::string, std::vector<std::string>>> result;
 	for (auto const& entitiy : parse_table) {
 		if (entitiy.second.first)
@@ -471,6 +478,19 @@ std::map<std::size_t, std::map<std::string, std::set<std::string> > > Grammar::b
 	}
 }
 
+void Grammar::prepare_parse_table() {
+	auto aut = build_goto_table();
+	for (auto const& entity : aut) {
+		for (std::string const& value : get_terminals()) {
+			get_action(entity.first, value);
+		}
+		for (std::string const& value : get_nonTerminals()) {
+			get_action(entity.first, value);
+		}
+		get_action(entity.first, "$");
+	}
+}
+
 /*
  * actions:
  * reduce - 1
@@ -498,7 +518,7 @@ std::pair<std::size_t, std::string> Grammar::get_action(std::size_t id, std::str
 						auto& action = parse_table[{id, symbol}];
 						if (is_terminal(symbol)) {
 							if (action.first == 1) {
-								throw std::runtime_error("Shift-Reduce Conflict {" + std::to_string(id) + ", " + symbol + "}");
+								throw std::runtime_error("NOT SLR Grammar: Shift-Reduce Conflict {" + std::to_string(id) + ", " + symbol + "}");
 							}
 							action = {2, std::to_string(goto_table_inv[block.second])};
 						} else if (is_nonTerminal(symbol)) {
@@ -532,11 +552,11 @@ std::pair<std::size_t, std::string> Grammar::get_action(std::size_t id, std::str
 						for (auto const& term : get_follow(entity.first)) {
 							auto& action = parse_table[{id, term}];
 							if (action.first == 2) {
-								throw std::runtime_error("Shift-Reduce Conflict {" + std::to_string(id) + ", " + term + "}");
+								throw std::runtime_error("NOT SLR Grammar: Shift-Reduce Conflict {" + std::to_string(id) + ", " + term + "}");
 							}
 							if (action.first != 0 &&
 									(action.first != 1 || action.second != rule)) {
-								throw std::runtime_error("Reduce-Reduce Conflict in {" + std::to_string(id) + ", " + term + "}");
+								throw std::runtime_error("NOT SLR Grammar: Reduce-Reduce Conflict in {" + std::to_string(id) + ", " + term + "}");
 							}
 							action = {1, rule};
 						}

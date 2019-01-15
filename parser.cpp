@@ -19,7 +19,7 @@ Tree::Tree(std::string value) : root (std::make_unique<node>(std::move(value))) 
 Tree::node::node(std::string const& vl) : value(vl) {}
 
 void Tree::node::push_node(std::unique_ptr<node>&& pn) {
-    children.emplace_back(std::move(pn));
+	children.emplace_back(std::move(pn));
 }
 
 void Tree::node::emplace_node(std::string vl, std::vector<std::unique_ptr<node>>&& ch) {
@@ -49,15 +49,14 @@ void Tree::dfs(std::unique_ptr<node> const& cur, std::vector<std::string>& res) 
     }
 }
 
-Parser::Parser(std::string str) : lexer(str) {
-}
+Parser::Parser(Grammar const& g) : grammar(g) {}
 
-Parser::Parser(std::string str, std::vector<std::string> const& t) : lexer(str, t) {}
-
-Tree Parser::parseLR(Grammar& grammar) {
+Tree Parser::parseLL1(std::string const& str) {
+	Lexer lexer{str, grammar.get_terminals()};
     grammar.build_first_set();
-    for (auto const& nt : grammar.get_nonTerminals()) {
-        parse_[nt] = [this, &grammar, nt]() mutable {
+	grammar.build_ll1_table();
+	for (auto const& nt : grammar.get_nonTerminals()) {
+		parse_[nt] = [this, &lexer, nt]() mutable {
             bool has_eps {false};
             Tree res(nt);
             for (auto const& tl : grammar.get_rules_for(nt)) {
@@ -95,7 +94,9 @@ Tree Parser::parseLR(Grammar& grammar) {
     return parse_[grammar.get_start()]();
 }
 
-Tree Parser::parseSLR(Grammar &grammar) {
+Tree Parser::parseSLR(std::string const& str) {
+	grammar.prepare_parse_table();
+	Lexer lexer{str, grammar.get_terminals()};
 	try {
 		std::stack<std::string> stack;
 		std::stack<Tree> tree_stack;
@@ -144,9 +145,7 @@ Tree Parser::parseSLR(Grammar &grammar) {
 				default: throw parser_exception("invalid input :" + lexer.current_string_token());
 			}
 		}
-
 		done:
-		std::cout << stack.size() << std::endl;
 		return std::move(tree_stack.top());
 	} catch (std::runtime_error& e) {
 		throw parser_exception(e.what());

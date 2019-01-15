@@ -21,6 +21,8 @@ struct Grammar {
             std::set<std::string> terminals,
             std::string const& start);
 
+	Grammar(Grammar const&) = default;
+
     auto const& data() const;
 
     Grammar& operator = (Grammar const&) = default;
@@ -53,7 +55,11 @@ struct Grammar {
 
 	std::map<std::size_t, std::map<std::string, std::set<std::string>>> build_goto_table();
 
+	void prepare_parse_table();
 	std::pair<std::size_t, std::string> get_action(std::size_t id, std::string symbol);
+
+
+
 
 private:
 

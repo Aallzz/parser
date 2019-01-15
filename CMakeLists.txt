@@ -27,7 +27,14 @@ set( res
     "treant-js"
     "grammar.txt"
     "grammar2.txt"
-    "grammar3.txt"
+    "basic_arithmetic_grammar.txt"
+    "basic_arithmetic_grammar2.txt"
+    "brackets_grammar.txt"
+    "brackets_grammar2.txt"
+    "brackets_grammar3.txt"
+    "nested_lists_grammar.txt"
+    "if_else_grammar.txt"
+    "c_function_grammar.txt"
 )
 
 # do the copying
