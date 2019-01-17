@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.8.0, 2019-01-15T13:42:14. -->
+<!-- Written by QtCreator 4.8.0, 2019-01-15T15:13:00. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -403,7 +403,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.temp_code
 /home/alexander/MT2/</value>
-    <value type="QString" key="RunConfiguration.Arguments">&quot;id* id(id&amp; id, id id, id* id)&quot; &quot;c_function_grammar.txt&quot;</value>
+    <value type="QString" key="RunConfiguration.Arguments"></value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

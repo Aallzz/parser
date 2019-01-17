@@ -11,7 +11,7 @@
 
 using namespace std;
 
-
+// "id* id(id& id, id id, id* id)" "c_function_grammar.txt"
 int main(int argc, char* argv[]) {
 
 	std::string string_expression = "id + id * (id * (id) + id)";    // OK
@@ -78,23 +78,23 @@ int main(int argc, char* argv[]) {
 //					},
 //					"S");
 
-	Grammar grammar({
-						"X -> E",
-						"E -> E + T",
-						"E -> T",
-						"T -> T * F",
-						"T -> F",
-						"F -> ( E )",
-						"F -> id",
-					},
-					{
-						"X", "E", "T", "F"
-					},
-					{
-						"id", "(", ")", "eps", "+", "*"
-					},
-					"X"
-					);
+//	Grammar grammar({
+//						"X -> E",
+//						"E -> E + T",
+//						"E -> T",
+//						"T -> T * F",
+//						"T -> F",
+//						"F -> ( E )",
+//						"F -> id",
+//					},
+//					{
+//						"X", "E", "T", "F"
+//					},
+//					{
+//						"id", "(", ")", "eps", "+", "*"
+//					},
+//					"X"
+//					);
 
 ////	Reduce-Reduce Conflict
 //	Grammar grammar({
@@ -115,21 +115,22 @@ int main(int argc, char* argv[]) {
 //					},
 //					"S'");
 
-//	Grammar grammar({
-//						"S -> E",
-//						"E -> L = R",
-//						"E -> R",
-//						"L -> id",
-//						"L -> * R",
-//						"R -> L"
-//					},
-//					{
-//						"S", "E", "L", "R"
-//					},
-//					{
-//						"id", "*", "=", "eps"
-//					},
-//					"S");
+	Grammar grammar({
+						"S -> E",
+						"E -> L = R",
+						"E -> R",
+						"L -> id",
+						"L -> * R",
+						"R -> L"
+					},
+					{
+						"S", "E", "L", "R"
+					},
+					{
+						"id", "*", "=", "eps"
+					},
+					"S");
+	grammar_expect_type = "SLR";
 
     if (argc >= 2) {
         string_expression = string(argv[1]);
@@ -260,6 +261,7 @@ int main(int argc, char* argv[]) {
 	} else {
 		parser_out << build_json_header(string_expression + ": " + "Unknow grammar type : " + grammar_expect_type) << endl;
 	}
+
 
 
 	pid_t pid = fork();

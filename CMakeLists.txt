@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(temp_code)
+project(parsers)
 add_executable(${PROJECT_NAME} main.cpp
                                lexer.cpp lexer.h
                                parser.cpp parser.h
